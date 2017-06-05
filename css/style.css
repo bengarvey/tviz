@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  font-family: helvetica, arial;
+}
+
+.tip-h3 {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.tip-ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.tip-li {
+  font-size: 10px;
+}

@@ -1,0 +1,29 @@
+<html>
+<head>
+<title>Trello Viz</title>
+
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="js/tviz.js"></script>
+
+  <script>
+    var tviz = null;
+    function start() {
+      config = {
+        "d3": d3,
+        "path":"data/cards.json"
+      }
+      tviz = new TrelloViz(config);
+      tviz.start();
+    }
+
+    function updateScroll() {
+      tviz.checkScroll();
+    }
+  </script>
+
+</head>
+<body onLoad="start()" onScroll="updateScroll()">
+  <svg></svg>
+</body>
+</html>
