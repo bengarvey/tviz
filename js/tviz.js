@@ -9,6 +9,7 @@ function TrelloViz() {
   var leftMargin = 10;
 
   var listHeight = 400;
+  var typeHeight = 400;
   var maxHeight = 2000;
 
   stage = 0;
@@ -36,6 +37,7 @@ function TrelloViz() {
         cards = setLabels(csv, cards);
         getActions(cards);
         drawDividers();
+        drawTypes();
       });
     });
 
@@ -50,10 +52,10 @@ function TrelloViz() {
 
   function setStage() {
     var scroll = getScroll();
-    return scroll< 150 ? 0 :
-      scroll >= 150 && scroll < 155 ? 1 :
-      scroll >= 155 && scroll < 400 ? 2 :
-      scroll >= 400 ? 3 : 0;
+    return scroll< 75 ? 0 :
+      scroll >= 75 && scroll < 76 ? 1 :
+      scroll >= 76 && scroll < 500 ? 2 :
+      scroll >= 600 ? 3 : 0;
   }
 
   function getScroll() {
@@ -103,8 +105,8 @@ function TrelloViz() {
     var columns = getColumnSpace(8);
     var typeIndex = getTypeIndex(getLabel(ORANGE, d));
     var x = calculateX(index, columns, 10, 8);
-    var y = calculateY(index, columns, 8, (typeIndex * 200) + 400);
-    return {x: x, y: y};
+    var y = calculateY(index, columns, 8, (typeIndex * 325) + 550);
+    return {x: x, y: y, text: getLabel(ORANGE, d)};
   }
 
   function calculateX(index, columns, margin, colSpacing) {
@@ -236,7 +238,7 @@ function TrelloViz() {
 
     var tip = d3.selectAll(".tip");
 
-    circle.transition().duration(250)
+    circle.transition().duration(1000)
       .attr("r", getRadius)
       .attr("cy", getCy)
       .attr("cx", getCx);
@@ -328,6 +330,13 @@ function TrelloViz() {
     return html;
   }
 
+  function drawTypes() {
+    var positions = getTypePositions();
+    console.log(positions);
+    var typeName = svg.selectAll(".typeName").data(positions);
+    drawTypeNames(typeName);
+   }
+
   function drawDividers() {
     var positions = getListPositions();
     var line = svg.selectAll("line").data(positions);
@@ -347,6 +356,37 @@ function TrelloViz() {
       }
     }
     return positions;
+  }
+
+  function getTypePositions() {
+    var positions = [];
+    var space = 30;
+    var types = getTypeNames();
+    for(var i=0; i<4; i++) {
+      var typeIndex = i;
+      positions[i] = {
+        y: calculateY(0, 1, 2, (typeIndex * 83) + 550),
+        x: 5,
+        text: Object.keys(types)[i]
+      }
+    }
+    return positions;
+  }
+
+  function drawTypeNames(typeName) {
+    console.log("running", typeName);
+    typeName.enter()
+      .append("text")
+        .attr("class", "typeName")
+        .attr("x", function(d) { return d.x; })
+        .attr("y", function(d) { return d.y - 10; })
+        .attr("fill", "#DDD")
+        .attr("font-size", "24px")
+        .attr("font-family","sans-serif")
+        .style("cursor", "default")
+        .text(function(d) { return d.text; });
+    typeName
+      .style("opacity", function() { console.log("stage", stage); return stage == 2 ? 1 : 0; });
   }
 
   function drawListNames(listName) {
@@ -437,7 +477,7 @@ function TrelloViz() {
         cards = results[1];
         update(cards);
         currentTime += 1000 * 60 * 60 * 3;
-       }, 100);
+       }, 1000);
     }
     );
   }
@@ -487,7 +527,7 @@ function TrelloViz() {
 
   function getTypeNames() {
     return {
-      "Uncategories":0,
+      "Uncategorized":0,
       "Core": 1,
       "Data": 2,
       "Web": 3,
