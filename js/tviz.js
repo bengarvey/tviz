@@ -54,8 +54,8 @@ function TrelloViz() {
     var scroll = getScroll();
     return scroll< 75 ? 0 :
       scroll >= 75 && scroll < 76 ? 1 :
-      scroll >= 76 && scroll < 500 ? 2 :
-      scroll >= 600 ? 3 : 0;
+      scroll >= 76 && scroll < 700 ? 2 :
+      scroll >= 700 ? 3 : 0;
   }
 
   function getScroll() {
@@ -121,6 +121,18 @@ function TrelloViz() {
     return Math.round((window.innerWidth/3)/(colSpacing));
   }
 
+  function getLineOpacity() {
+    return stage == 3 ? 1 : 0;
+  }
+
+  function getLineX2(c, maxDuration) {
+    return stage == 3 ? calculateLineLength(c, maxDuration) : 20;
+  }
+
+  function calculateLineLength(c, maxDuration) {
+    return ((c.duration / maxDuration) * (window.innerWidth-15)) + 15;
+  }
+
   function getCx(d, i, s) {
     return stage == 3 ? 10 :
       stage == 2 ? xType(d, i, s) :
@@ -137,7 +149,7 @@ function TrelloViz() {
   }
 
   function getCy(d, i, s) {
-    return stage == 3 ? (i*10) :
+    return stage == 3 ? (i*10) + 900 :
       stage == 2 ? yType(d) :
       stage == 1 ? yRandom() :
       stage == 0 ? yList(d, i) : 0;
@@ -173,7 +185,7 @@ function TrelloViz() {
 
   function getTipPos() {
     var x = (window.innerWidth/3) + 100;
-    var y = listHeight - 200;
+    var y = getScroll() + 200;
     return {x:x,y:y};
   }
 
@@ -270,8 +282,35 @@ function TrelloViz() {
               .style("opacity", 0);
       });
 
+    addTimelines(cards);
+  }
 
- }
+  function addTimelines(cards) {
+    var timelines = svg.selectAll(".timeline").data(cards);
+    var maxDuration = 0;
+    for(i=0; i<cards.length; i++) {
+      if (cards[i].duration > maxDuration) {
+        maxDuration = cards[i].duration;
+      }
+    }
+    console.log(maxDuration);
+    timelines.enter().append("line")
+      .attr("class", "timeline")
+      .attr("x1", 15)
+      .attr("y1", getCy)
+      .attr("x2", 20)
+      .attr("y2", getCy)
+      .attr("stroke", '#333')
+      .attr("stroke-width", 1)
+      .style("opacity", getLineOpacity);
+
+    timelines.transition().duration(500)
+      .attr("x2", function(c, maxDuration) { return getLineX2(c, maxDuration); })
+    timelines
+      .attr("y1", getCy)
+      .attr("y2", getCy)
+      .style("opacity", getLineOpacity);
+  }
 
   function addTimeline(tip, d) {
     coords = getTipPos();
